@@ -357,7 +357,11 @@ if data_source and groq_api_key:
             mask = display_df.apply(lambda r: r.astype(str).str.contains(search_box, case=False).any(), axis=1)
             display_df = display_df[mask]
 
-        styled = display_df.style.applymap(style_status, subset=["Status"])
+        styler = display_df.style
+        if hasattr(styler, "map"):
+            styled = styler.map(style_status, subset=["Status"])
+        else:
+            styled = styler.applymap(style_status, subset=["Status"])
         st.dataframe(styled, use_container_width=True, hide_index=True)
         st.caption(f"Showing {len(display_df)} of {len(df)} orders")
 
