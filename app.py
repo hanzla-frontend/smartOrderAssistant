@@ -190,6 +190,14 @@ st.markdown("""
     div[data-testid="stAlert"] { border-radius: 10px; }
     div[data-testid="stAlert"] p { color: #0f172a !important; }
 
+    /* ---- SCROLLABLE CHAT CONTAINER ---- */
+    div[data-testid="stVerticalBlockBorderWrapper"] > div[style*="overflow"] {
+        border-radius: 14px;
+        border: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.02);
+        padding: 0.5rem;
+    }
+
     /* ---- SCROLLBAR ---- */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.4); border-radius: 4px; }
@@ -442,12 +450,14 @@ if data_source and groq_api_key:
                         handle_query(eq)
                         st.rerun()
 
-        for msg in st.session_state.chat_history:
-            with st.chat_message(msg["role"]):
-                st.write(msg["content"])
-                if msg["role"] == "assistant" and "context_df" in msg:
-                    with st.expander("Sources used"):
-                        st.dataframe(msg["context_df"], use_container_width=True, hide_index=True)
+        chat_box = st.container(height=450)
+        with chat_box:
+            for msg in st.session_state.chat_history:
+                with st.chat_message(msg["role"]):
+                    st.write(msg["content"])
+                    if msg["role"] == "assistant" and "context_df" in msg:
+                        with st.expander("Sources used"):
+                            st.dataframe(msg["context_df"], use_container_width=True, hide_index=True)
 
         query = st.chat_input("Ask about your orders... e.g. 'which orders are cancelled?'")
 
