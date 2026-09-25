@@ -508,17 +508,25 @@ if data_source and groq_api_key:
     with tab_data:
         st.markdown("#### Full order dataset")
         search_box = st.text_input("🔍 Filter by keyword (any column)")
-        display_df = df.drop(columns=["text"])
+        display_df = df.drop(columns=["text"]).copy()
         if search_box:
             mask = display_df.apply(lambda r: r.astype(str).str.contains(search_box, case=False).any(), axis=1)
             display_df = display_df[mask]
 
-        styler = display_df.style
-        if hasattr(styler, "map"):
-            styled = styler.map(style_status, subset=["Status"])
-        else:
-            styled = styler.applymap(style_status, subset=["Status"])
-        st.dataframe(styled, use_container_width=True, hide_index=True)
+        # Emoji-prefixed status instead of pandas Styler colors: Styler renders
+        # in a separate embedded frame that page-level CSS can't reach, which is
+        # why it wrapped text letter-by-letter on mobile. Plain text + emoji
+        # keeps it in the same responsive dataframe component as everything else.
+        status_emoji = {
+            "Delivered": "🟢", "Shipped": "🔵", "Processing": "🟠",
+            "Pending": "⚪", "Cancelled": "🔴", "Returned": "🟣",
+        }
+        if "Status" in display_df.columns:
+            display_df["Status"] = display_df["Status"].apply(
+                lambda s: f"{status_emoji.get(s, '⚪')} {s}"
+            )
+
+        st.dataframe(display_df, use_container_width=True, hide_index=True)
         st.caption(f"Showing {len(display_df)} of {len(df)} orders")
 
 else:
