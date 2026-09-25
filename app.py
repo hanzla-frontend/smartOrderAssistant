@@ -209,6 +209,24 @@ st.markdown("""
         overflow-x: auto !important;
     }
 
+    /* ---- Fix: table headers/cells were wrapping letter-by-letter on narrow
+       screens because the browser had no room and broke at every character.
+       Force single-line text and let the table scroll sideways instead. ---- */
+    div[data-testid="stDataFrame"] table,
+    div[data-testid="stTable"] table {
+        min-width: 700px;
+    }
+    div[data-testid="stDataFrame"] th,
+    div[data-testid="stDataFrame"] td,
+    div[data-testid="stTable"] th,
+    div[data-testid="stTable"] td {
+        white-space: nowrap !important;
+        word-break: keep-all !important;
+        overflow-wrap: normal !important;
+        text-align: left !important;
+        padding: 6px 10px !important;
+    }
+
     /* ---- SCROLLBAR ---- */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.4); border-radius: 4px; }
