@@ -14,20 +14,113 @@ st.set_page_config(
 # ---------------- CUSTOM STYLING ----------------
 st.markdown("""
 <style>
-    .main-header {
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin-bottom: 0;
+    /* Animated gradient background for the whole app */
+    .stApp {
+        background: linear-gradient(-45deg, #0f172a, #1e293b, #312e81, #0f172a);
+        background-size: 400% 400%;
+        animation: gradientShift 18s ease infinite;
     }
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Animated gradient text for the title */
+    .main-header {
+        font-size: 2.6rem;
+        font-weight: 800;
+        margin-bottom: 0;
+        background: linear-gradient(90deg, #38bdf8, #a78bfa, #38bdf8);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: shine 6s linear infinite;
+    }
+    @keyframes shine {
+        to { background-position: 200% center; }
+    }
+
     .sub-header {
-        color: #6b7280;
-        font-size: 1rem;
+        color: #cbd5e1;
+        font-size: 1.05rem;
         margin-top: 0;
         margin-bottom: 1.5rem;
+        opacity: 0;
+        animation: fadeIn 1s ease forwards 0.3s;
     }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Glassmorphism cards for metrics */
+    div[data-testid="stMetric"] {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(8px);
+        border-radius: 16px;
+        padding: 1rem;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    div[data-testid="stMetric"]:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Chat message bubbles fade+slide in */
     div[data-testid="stChatMessage"] {
-        border-radius: 12px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        animation: slideIn 0.35s ease;
+        margin-bottom: 0.5rem;
     }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Sidebar styling */
+    section[data-testid="stSidebar"] {
+        background: rgba(15, 23, 42, 0.85);
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Buttons */
+    .stButton > button {
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        transition: all 0.2s ease;
+    }
+    .stButton > button:hover {
+        border-color: #38bdf8;
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        transform: translateY(-2px);
+    }
+
+    /* Tabs */
+    button[data-baseweb="tab"] {
+        font-weight: 600;
+        transition: color 0.2s ease;
+    }
+
+    /* Dataframe container */
+    div[data-testid="stDataFrame"] {
+        border-radius: 12px;
+        overflow: hidden;
+        animation: fadeIn 0.5s ease;
+    }
+
+    /* Chat input glow on focus */
+    div[data-testid="stChatInput"] textarea:focus {
+        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.5) !important;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.4); border-radius: 4px; }
 </style>
 """, unsafe_allow_html=True)
 
