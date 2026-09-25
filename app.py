@@ -121,6 +121,69 @@ st.markdown("""
     /* Scrollbar */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.4); border-radius: 4px; }
+
+    /* ---- TEXT CONTRAST FIXES ---- */
+    /* Force readable light text everywhere on the dark background */
+    .stApp, .stApp p, .stApp li, .stApp label, .stApp span,
+    .stMarkdown, .stCaption, .stText {
+        color: #e5e7eb !important;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        color: #f8fafc !important;
+    }
+
+    /* Metric labels and values */
+    div[data-testid="stMetric"] label {
+        color: #94a3b8 !important;
+    }
+    div[data-testid="stMetricValue"] {
+        color: #f1f5f9 !important;
+    }
+
+    /* Sidebar text */
+    section[data-testid="stSidebar"] * {
+        color: #e5e7eb !important;
+    }
+
+    /* Input fields, text areas, selects - dark bg + light text */
+    .stTextInput input, .stTextArea textarea,
+    div[data-baseweb="select"] > div, div[data-testid="stChatInput"] textarea {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        color: #f8fafc !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    }
+    .stTextInput input::placeholder, div[data-testid="stChatInput"] textarea::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    /* Expander headers */
+    .streamlit-expanderHeader, details summary {
+        color: #e5e7eb !important;
+    }
+
+    /* Tabs text */
+    button[data-baseweb="tab"] p {
+        color: #cbd5e1 !important;
+    }
+    button[data-baseweb="tab"][aria-selected="true"] p {
+        color: #38bdf8 !important;
+    }
+
+    /* Chat message text */
+    div[data-testid="stChatMessage"] p, div[data-testid="stChatMessage"] div {
+        color: #f1f5f9 !important;
+    }
+
+    /* Keep dataframe (rendered in its own light iframe) readable regardless of theme */
+    div[data-testid="stDataFrame"] {
+        background: #ffffff;
+    }
+
+    /* Info/warning/error boxes: keep default backgrounds but ensure text is dark enough on them */
+    div[data-testid="stAlert"] p {
+        color: #0f172a !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
