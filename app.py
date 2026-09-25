@@ -14,52 +14,71 @@ st.set_page_config(
 # ---------------- CUSTOM STYLING ----------------
 st.markdown("""
 <style>
-    /* Animated gradient background for the whole app */
+    :root {
+        --bg-primary: #0b1220;
+        --bg-secondary: #131c2e;
+        --bg-card: #1a2536;
+        --border-color: #2a3a52;
+        --text-primary: #f1f5f9;
+        --text-secondary: #a0aec0;
+        --accent: #38bdf8;
+        --accent-secondary: #a78bfa;
+    }
+
+    /* ---- BACKGROUND ---- */
     .stApp {
-        background: linear-gradient(-45deg, #0f172a, #1e293b, #312e81, #0f172a);
+        background: linear-gradient(-45deg, var(--bg-primary), var(--bg-secondary), #1e2a45, var(--bg-primary));
         background-size: 400% 400%;
-        animation: gradientShift 18s ease infinite;
+        animation: gradientShift 20s ease infinite;
     }
     @keyframes gradientShift {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
     }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-    /* Animated gradient text for the title */
+    /* ---- BASE TEXT: every element defaults to text-primary on the dark bg ---- */
+    .stApp, .stApp p, .stApp li, .stApp span, .stApp label,
+    .stMarkdown, .stCaption {
+        color: var(--text-primary) !important;
+    }
+    h1, h2, h3, h4, h5, h6 { color: var(--text-primary) !important; }
+
+    /* ---- HEADER ---- */
     .main-header {
         font-size: 2.6rem;
         font-weight: 800;
         margin-bottom: 0;
-        background: linear-gradient(90deg, #38bdf8, #a78bfa, #38bdf8);
+        background: linear-gradient(90deg, var(--accent), var(--accent-secondary), var(--accent));
         background-size: 200% auto;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         animation: shine 6s linear infinite;
     }
-    @keyframes shine {
-        to { background-position: 200% center; }
-    }
+    @keyframes shine { to { background-position: 200% center; } }
 
     .sub-header {
-        color: #cbd5e1;
+        color: var(--text-secondary) !important;
         font-size: 1.05rem;
         margin-top: 0;
         margin-bottom: 1.5rem;
         opacity: 0;
         animation: fadeIn 1s ease forwards 0.3s;
     }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-6px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
 
-    /* Glassmorphism cards for metrics */
+    /* ---- METRIC CARDS ---- */
     div[data-testid="stMetric"] {
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        backdrop-filter: blur(8px);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: 16px;
         padding: 1rem;
         transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -68,124 +87,97 @@ st.markdown("""
         transform: translateY(-4px);
         box-shadow: 0 8px 24px rgba(56, 189, 248, 0.25);
     }
+    div[data-testid="stMetric"] label { color: var(--text-secondary) !important; }
+    div[data-testid="stMetricValue"] { color: var(--text-primary) !important; }
 
-    /* Chat message bubbles fade+slide in */
+    /* ---- CHAT ---- */
     div[data-testid="stChatMessage"] {
         border-radius: 16px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         animation: slideIn 0.35s ease;
         margin-bottom: 0.5rem;
     }
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
+    div[data-testid="stChatMessage"] p, div[data-testid="stChatMessage"] div {
+        color: var(--text-primary) !important;
     }
-
-    /* Sidebar styling */
-    section[data-testid="stSidebar"] {
-        background: rgba(15, 23, 42, 0.85);
-        border-right: 1px solid rgba(255, 255, 255, 0.08);
+    div[data-testid="stChatInput"] textarea {
+        background-color: var(--bg-card) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
     }
-
-    /* Buttons */
-    .stButton > button {
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        transition: all 0.2s ease;
-    }
-    .stButton > button:hover {
-        border-color: #38bdf8;
-        box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
-        transform: translateY(-2px);
-    }
-
-    /* Tabs */
-    button[data-baseweb="tab"] {
-        font-weight: 600;
-        transition: color 0.2s ease;
-    }
-
-    /* Dataframe container */
-    div[data-testid="stDataFrame"] {
-        border-radius: 12px;
-        overflow: hidden;
-        animation: fadeIn 0.5s ease;
-    }
-
-    /* Chat input glow on focus */
+    div[data-testid="stChatInput"] textarea::placeholder { color: var(--text-secondary) !important; }
     div[data-testid="stChatInput"] textarea:focus {
         box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.5) !important;
     }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.4); border-radius: 4px; }
-
-    /* ---- TEXT CONTRAST FIXES ---- */
-    /* Force readable light text everywhere on the dark background */
-    .stApp, .stApp p, .stApp li, .stApp label, .stApp span,
-    .stMarkdown, .stCaption, .stText {
-        color: #e5e7eb !important;
+    /* ---- SIDEBAR ---- */
+    section[data-testid="stSidebar"] {
+        background: var(--bg-secondary) !important;
+        border-right: 1px solid var(--border-color);
+    }
+    section[data-testid="stSidebar"] * { color: var(--text-primary) !important; }
+    section[data-testid="stSidebar"] input,
+    section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
+        background-color: var(--bg-card) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
     }
 
-    h1, h2, h3, h4, h5, h6 {
-        color: #f8fafc !important;
-    }
-
-    /* Metric labels and values */
-    div[data-testid="stMetric"] label {
-        color: #94a3b8 !important;
-    }
-    div[data-testid="stMetricValue"] {
-        color: #f1f5f9 !important;
-    }
-
-    /* Sidebar text */
-    section[data-testid="stSidebar"] * {
-        color: #e5e7eb !important;
-    }
-
-    /* Input fields, text areas, selects - dark bg + light text */
+    /* ---- INPUTS (main area) ---- */
     .stTextInput input, .stTextArea textarea,
-    div[data-baseweb="select"] > div, div[data-testid="stChatInput"] textarea {
-        background-color: rgba(255, 255, 255, 0.08) !important;
-        color: #f8fafc !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    div[data-baseweb="select"] > div {
+        background-color: var(--bg-card) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
     }
-    .stTextInput input::placeholder, div[data-testid="stChatInput"] textarea::placeholder {
-        color: #94a3b8 !important;
+    .stTextInput input::placeholder { color: var(--text-secondary) !important; }
+
+    /* ---- BUTTONS ---- */
+    .stButton > button {
+        background: var(--bg-card);
+        color: var(--text-primary) !important;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        transition: all 0.2s ease;
+    }
+    .stButton > button:hover {
+        border-color: var(--accent);
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        transform: translateY(-2px);
     }
 
-    /* Expander headers */
-    .streamlit-expanderHeader, details summary {
-        color: #e5e7eb !important;
+    /* ---- TABS ---- */
+    button[data-baseweb="tab"] { font-weight: 600; transition: color 0.2s ease; }
+    button[data-baseweb="tab"] p { color: var(--text-secondary) !important; }
+    button[data-baseweb="tab"][aria-selected="true"] p { color: var(--accent) !important; }
+
+    /* ---- EXPANDERS ---- */
+    .streamlit-expanderHeader, details summary { color: var(--text-primary) !important; }
+    details {
+        background: var(--bg-card) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 10px;
     }
 
-    /* Tabs text */
-    button[data-baseweb="tab"] p {
-        color: #cbd5e1 !important;
-    }
-    button[data-baseweb="tab"][aria-selected="true"] p {
-        color: #38bdf8 !important;
-    }
-
-    /* Chat message text */
-    div[data-testid="stChatMessage"] p, div[data-testid="stChatMessage"] div {
-        color: #f1f5f9 !important;
-    }
-
-    /* Keep dataframe (rendered in its own light iframe) readable regardless of theme */
+    /* ---- DATAFRAME: keep its own light surface, force dark readable text on it ---- */
     div[data-testid="stDataFrame"] {
+        border-radius: 12px;
+        overflow: hidden;
+        animation: fadeIn 0.5s ease;
         background: #ffffff;
     }
 
-    /* Info/warning/error boxes: keep default backgrounds but ensure text is dark enough on them */
-    div[data-testid="stAlert"] p {
-        color: #0f172a !important;
-    }
+    /* ---- ALERT BOXES (info/warning/error/success) ---- */
+    div[data-testid="stAlert"] { border-radius: 10px; }
+    div[data-testid="stAlert"] p { color: #0f172a !important; }
+
+    /* ---- SCROLLBAR ---- */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.4); border-radius: 4px; }
 </style>
 """, unsafe_allow_html=True)
+
 
 STATUS_COLORS = {
     "Delivered": "#16a34a",
