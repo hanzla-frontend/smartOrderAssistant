@@ -198,8 +198,27 @@ st.markdown("""
         padding: 0.5rem;
     }
 
+    /* ---- HORIZONTAL SCROLL: KPI metric row stays in one line, scrolls sideways on small screens ---- */
+    div[data-testid="stHorizontalBlock"] {
+        overflow-x: auto;
+        flex-wrap: nowrap !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    div[data-testid="stHorizontalBlock"] > div {
+        flex: 0 0 auto !important;
+        min-width: 140px;
+    }
+
+    /* ---- Dataframe: always allow horizontal scroll for wide tables ---- */
+    div[data-testid="stDataFrame"] {
+        overflow-x: auto !important;
+    }
+    div[data-testid="stDataFrameResizable"] {
+        overflow-x: auto !important;
+    }
+
     /* ---- SCROLLBAR ---- */
-    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.4); border-radius: 4px; }
 
     /* =========================================================
