@@ -459,8 +459,15 @@ if data_source and groq_api_key:
                 client = Groq(api_key=groq_api_key)
                 response = client.chat.completions.create(
                     model=model_name,
+                    max_tokens=200,
                     messages=[
-                        {"role": "system", "content": "Answer strictly based on the order data provided. If the answer isn't in the data, say so clearly."},
+                        {"role": "system", "content": (
+                            "Answer strictly based on the order data provided. "
+                            "Be brief and direct — a short sentence or a compact bullet/numbered list only. "
+                            "No long explanations, no repeating the question, no extra commentary. "
+                            "If listing orders, just give Order ID, Customer, and Status per line. "
+                            "If the answer isn't in the data, say so in one short sentence."
+                        )},
                         {"role": "user", "content": f"Order data:\n{context}\n\nQuestion: {query}"}
                     ]
                 )
