@@ -190,14 +190,6 @@ st.markdown("""
     div[data-testid="stAlert"] { border-radius: 10px; }
     div[data-testid="stAlert"] p { color: #0f172a !important; }
 
-    /* ---- SCROLLABLE CHAT CONTAINER ---- */
-    div[data-testid="stVerticalBlockBorderWrapper"] > div[style*="overflow"] {
-        border-radius: 14px;
-        border: 1px solid var(--border-color);
-        background: rgba(255, 255, 255, 0.02);
-        padding: 0.5rem;
-    }
-
     /* ---- HORIZONTAL SCROLL: KPI metric row stays in one line, scrolls sideways on small screens ---- */
     div[data-testid="stHorizontalBlock"] {
         overflow-x: auto;
@@ -258,6 +250,18 @@ st.markdown("""
             border-radius: 10px;
         }
         div[data-testid="stMetricValue"] { font-size: 1.1rem !important; }
+
+        /* Override: on mobile, KPI row stacks one-per-row (no horizontal scroll) */
+        div[data-testid="stHorizontalBlock"] {
+            flex-direction: column !important;
+            flex-wrap: wrap !important;
+            overflow-x: visible !important;
+        }
+        div[data-testid="stHorizontalBlock"] > div {
+            width: 100% !important;
+            min-width: 0 !important;
+            flex: 1 1 100% !important;
+        }
         div[data-testid="stMetric"] label { font-size: 0.7rem !important; }
 
         /* Chat bubbles take full width, tighter padding */
@@ -469,14 +473,12 @@ if data_source and groq_api_key:
                         handle_query(eq)
                         st.rerun()
 
-        chat_box = st.container(height=450)
-        with chat_box:
-            for msg in st.session_state.chat_history:
-                with st.chat_message(msg["role"]):
-                    st.write(msg["content"])
-                    if msg["role"] == "assistant" and "context_df" in msg:
-                        with st.expander("Sources used"):
-                            st.dataframe(msg["context_df"], use_container_width=True, hide_index=True)
+        for msg in st.session_state.chat_history:
+            with st.chat_message(msg["role"]):
+                st.write(msg["content"])
+                if msg["role"] == "assistant" and "context_df" in msg:
+                    with st.expander("Sources used"):
+                        st.dataframe(msg["context_df"], use_container_width=True, hide_index=True)
 
         query = st.chat_input("Ask about your orders... e.g. 'which orders are cancelled?'")
 
