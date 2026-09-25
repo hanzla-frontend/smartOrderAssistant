@@ -110,9 +110,14 @@ st.markdown("""
         border: 1px solid var(--border-color);
         animation: slideIn 0.35s ease;
         margin-bottom: 0.5rem;
+        max-width: 100%;
+        overflow-x: hidden;
     }
     div[data-testid="stChatMessage"] p, div[data-testid="stChatMessage"] div {
         color: var(--text-primary) !important;
+        word-wrap: break-word;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
     }
     div[data-testid="stChatInput"] textarea {
         background-color: var(--bg-card) !important;
@@ -309,6 +314,17 @@ with st.sidebar:
 
 
 # ---------------- DATA HELPERS ----------------
+def extract_city(address):
+    """Pulls the city out of an address like '123 Main St, Lahore, Punjab 54000'."""
+    try:
+        parts = [p.strip() for p in str(address).split(",")]
+        if len(parts) >= 2:
+            return parts[1].split()[0] if len(parts[1].split()) == 1 else parts[1]
+        return "Unknown"
+    except Exception:
+        return "Unknown"
+
+
 @st.cache_data
 def load_data(file):
     df = pd.read_excel(file)
@@ -319,6 +335,8 @@ def load_data(file):
                 f"on {row['Order Date']}. Status: {row['Status']}.")
 
     df["text"] = df.apply(row_to_text, axis=1)
+    if "Shipping Address" in df.columns:
+        df["City"] = df["Shipping Address"].apply(extract_city)
     return df
 
 
@@ -350,7 +368,22 @@ data_source = uploaded_file if uploaded_file is not None else (
 )
 
 if data_source and groq_api_key:
-    df = load_data(data_source)
+    df_full = load_data(data_source)
+
+    # ---- City filter (sidebar) ----
+    with st.sidebar:
+        st.markdown("### 🏙️ Filter by City")
+        if "City" in df_full.columns:
+            cities = sorted(df_full["City"].dropna().unique().tolist())
+            selected_cities = st.multiselect("Cities", cities, default=[], placeholder="All cities")
+        else:
+            selected_cities = []
+
+    df = df_full if not selected_cities else df_full[df_full["City"].isin(selected_cities)]
+    if df.empty:
+        st.warning("No orders match the selected city filter.")
+        df = df_full
+
     vectorizer, doc_vectors = build_index(df)
 
     # KPI row
@@ -368,6 +401,47 @@ if data_source and groq_api_key:
 
     # ---------------- CHAT TAB ----------------
     with tab_chat:
+
+        def handle_query(query):
+            st.session_state.chat_history.append({"role": "user", "content": query})
+            results = search(query, df, vectorizer, doc_vectors, k=top_k)
+            context = "\n".join(results["text"].tolist())
+            try:
+                client = Groq(api_key=groq_api_key)
+                response = client.chat.completions.create(
+                    model=model_name,
+                    messages=[
+                        {"role": "system", "content": "Answer strictly based on the order data provided. If the answer isn't in the data, say so clearly."},
+                        {"role": "user", "content": f"Order data:\n{context}\n\nQuestion: {query}"}
+                    ]
+                )
+                answer = response.choices[0].message.content
+            except Exception as e:
+                answer = f"⚠️ Error calling Groq API: {e}"
+
+            cols_to_show = [c for c in results.columns if c != "text"]
+            st.session_state.chat_history.append({
+                "role": "assistant",
+                "content": answer,
+                "context_df": results[cols_to_show]
+            })
+
+        # Suggested questions — helpful for anyone unsure what to ask
+        if not st.session_state.chat_history:
+            st.caption("Not sure what to ask? Try one of these:")
+            example_questions = [
+                "Which orders are cancelled?",
+                "List orders shipped to Lahore",
+                "How many orders are pending?",
+                "Who ordered a Bluetooth Speaker?",
+            ]
+            chip_cols = st.columns(2)
+            for i, eq in enumerate(example_questions):
+                with chip_cols[i % 2]:
+                    if st.button(eq, use_container_width=True, key=f"suggest_{i}"):
+                        handle_query(eq)
+                        st.rerun()
+
         for msg in st.session_state.chat_history:
             with st.chat_message(msg["role"]):
                 st.write(msg["content"])
@@ -378,38 +452,8 @@ if data_source and groq_api_key:
         query = st.chat_input("Ask about your orders... e.g. 'which orders are cancelled?'")
 
         if query:
-            st.session_state.chat_history.append({"role": "user", "content": query})
-            with st.chat_message("user"):
-                st.write(query)
-
-            with st.chat_message("assistant"):
-                with st.spinner("Searching orders and thinking..."):
-                    results = search(query, df, vectorizer, doc_vectors, k=top_k)
-                    context = "\n".join(results["text"].tolist())
-
-                    try:
-                        client = Groq(api_key=groq_api_key)
-                        response = client.chat.completions.create(
-                            model=model_name,
-                            messages=[
-                                {"role": "system", "content": "Answer strictly based on the order data provided. If the answer isn't in the data, say so clearly."},
-                                {"role": "user", "content": f"Order data:\n{context}\n\nQuestion: {query}"}
-                            ]
-                        )
-                        answer = response.choices[0].message.content
-                    except Exception as e:
-                        answer = f"⚠️ Error calling Groq API: {e}"
-
-                st.write(answer)
-                context_display = results.drop(columns=["text"])
-                with st.expander("Sources used"):
-                    st.dataframe(context_display, use_container_width=True, hide_index=True)
-
-            st.session_state.chat_history.append({
-                "role": "assistant",
-                "content": answer,
-                "context_df": results.drop(columns=["text"])
-            })
+            handle_query(query)
+            st.rerun()
 
     # ---------------- DATA TAB ----------------
     with tab_data:
