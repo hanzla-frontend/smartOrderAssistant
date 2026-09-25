@@ -1,7 +1,20 @@
+import os
 import streamlit as st
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from groq import Groq
+
+DEFAULT_ORDERS_FILE = "orders.xlsx"  # looked up next to app.py if the user doesn't upload one
+
+
+def get_default_api_key():
+    """Check Streamlit secrets first, then environment variable."""
+    try:
+        if "GROQ_API_KEY" in st.secrets:
+            return st.secrets["GROQ_API_KEY"]
+    except Exception:
+        pass
+    return os.environ.get("GROQ_API_KEY", "")
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
@@ -197,8 +210,23 @@ def style_status(val):
 # ---------------- SIDEBAR ----------------
 with st.sidebar:
     st.markdown("### ⚙️ Settings")
-    groq_api_key = st.text_input("Groq API Key", type="password", help="Get one at console.groq.com/keys")
-    uploaded_file = st.file_uploader("Upload orders.xlsx", type=["xlsx"])
+
+    default_key = get_default_api_key()
+    groq_api_key = st.text_input(
+        "Groq API Key",
+        value=default_key,
+        type="password",
+        help="Loaded automatically from st.secrets or the GROQ_API_KEY environment variable, if set."
+    )
+    if default_key:
+        st.caption("✅ API key auto-loaded")
+
+    uploaded_file = st.file_uploader(
+        "Upload orders.xlsx (optional — uses the repo's orders.xlsx by default)",
+        type=["xlsx"]
+    )
+    if uploaded_file is None and os.path.exists(DEFAULT_ORDERS_FILE):
+        st.caption(f"✅ Using default: {DEFAULT_ORDERS_FILE}")
 
     with st.expander("Advanced options"):
         model_name = st.selectbox(
@@ -254,8 +282,12 @@ st.markdown('<p class="main-header">📦 Orders Q&A Assistant</p>', unsafe_allow
 st.markdown('<p class="sub-header">Ask questions about your orders in plain English — powered by Groq</p>', unsafe_allow_html=True)
 
 # ---------------- MAIN ----------------
-if uploaded_file and groq_api_key:
-    df = load_data(uploaded_file)
+data_source = uploaded_file if uploaded_file is not None else (
+    DEFAULT_ORDERS_FILE if os.path.exists(DEFAULT_ORDERS_FILE) else None
+)
+
+if data_source and groq_api_key:
+    df = load_data(data_source)
     vectorizer, doc_vectors = build_index(df)
 
     # KPI row
@@ -330,7 +362,12 @@ if uploaded_file and groq_api_key:
         st.caption(f"Showing {len(display_df)} of {len(df)} orders")
 
 else:
-    st.info("👈 Enter your Groq API key and upload `orders.xlsx` in the sidebar to get started.")
+    missing = []
+    if not groq_api_key:
+        missing.append("a Groq API key (set `GROQ_API_KEY` as an env var / secret, or paste it in the sidebar)")
+    if not data_source:
+        missing.append(f"an orders file (place `{DEFAULT_ORDERS_FILE}` next to app.py, or upload one)")
+    st.info("👈 Still needed: " + " and ".join(missing))
     st.markdown("""
     **What this app does:**
     1. Reads your order data from Excel
