@@ -188,6 +188,69 @@ st.markdown("""
     /* ---- SCROLLBAR ---- */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.4); border-radius: 4px; }
+
+    /* =========================================================
+       RESPONSIVE BREAKPOINTS
+       ========================================================= */
+
+    /* Base: tighten default padding on small screens so content
+       isn't cramped against the edges */
+    .block-container {
+        padding-top: 1.5rem;
+        padding-left: 1.2rem;
+        padding-right: 1.2rem;
+        max-width: 1200px;
+    }
+
+    /* ---- TABLET (<= 992px) ---- */
+    @media (max-width: 992px) {
+        .main-header { font-size: 2.1rem; }
+        .sub-header { font-size: 0.95rem; }
+        .block-container { padding-left: 1rem; padding-right: 1rem; }
+    }
+
+    /* ---- MOBILE (<= 640px) ---- */
+    @media (max-width: 640px) {
+        .main-header { font-size: 1.6rem; }
+        .sub-header { font-size: 0.85rem; margin-bottom: 1rem; }
+
+        .block-container {
+            padding-top: 1rem;
+            padding-left: 0.6rem;
+            padding-right: 0.6rem;
+        }
+
+        /* Metric cards: smaller padding + font so 4-in-a-row still fits */
+        div[data-testid="stMetric"] {
+            padding: 0.5rem;
+            border-radius: 10px;
+        }
+        div[data-testid="stMetricValue"] { font-size: 1.1rem !important; }
+        div[data-testid="stMetric"] label { font-size: 0.7rem !important; }
+
+        /* Chat bubbles take full width, tighter padding */
+        div[data-testid="stChatMessage"] {
+            padding: 0.6rem !important;
+            margin-bottom: 0.4rem;
+        }
+
+        /* Tabs: smaller text so both tabs fit without wrapping */
+        button[data-baseweb="tab"] p { font-size: 0.85rem !important; }
+
+        /* Buttons full-width friendly */
+        .stButton > button { width: 100%; }
+
+        /* Dataframe: allow horizontal scroll instead of squishing columns */
+        div[data-testid="stDataFrame"] {
+            overflow-x: auto !important;
+        }
+    }
+
+    /* ---- VERY SMALL (<= 400px) ---- */
+    @media (max-width: 400px) {
+        .main-header { font-size: 1.35rem; }
+        div[data-testid="stMetricValue"] { font-size: 0.95rem !important; }
+    }
 </style>
 """, unsafe_allow_html=True)
 
